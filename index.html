@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subah Ka Nashta — Weekly Breakfast Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root {
+    --saffron: #E8A838;
+    --turmeric: #D4912A;
+    --terracotta: #C1553B;
+    --deep-maroon: #6B1D2A;
+    --cream: #FFF8F0;
+    --warm-white: #FFFDF9;
+    --card-bg: #FFFFFF;
+    --text-primary: #2C1810;
+    --text-secondary: #7A5C4F;
+    --text-muted: #A8907A;
+    --border: rgba(200,170,140,0.3);
+    --shadow-soft: 0 4px 24px rgba(107,29,42,0.08);
+    --shadow-hover: 0 12px 40px rgba(107,29,42,0.14);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html { scroll-behavior: smooth }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(232,168,56,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -300px;
+    left: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(193,85,59,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; }
+
+  /* ─── Header ─── */
+  header {
+    text-align: center;
+    padding: 48px 20px 12px;
+    position: relative;
+  }
+
+  .brand-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    background: rgba(193,85,59,0.08);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    color: var(--deep-maroon);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  header h1 em {
+    color: var(--terracotta);
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  header p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ─── Shuffle Bar ─── */
+  .shuffle-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 20px 8px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to bottom, var(--cream) 60%, transparent);
+    padding-bottom: 24px;
+  }
+
+  .btn-shuffle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--deep-maroon);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 16px rgba(107,29,42,0.25);
+  }
+  .btn-shuffle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(107,29,42,0.35);
+    background: #7d2233;
+  }
+  .btn-shuffle:active { transform: scale(0.97) }
+
+  .btn-shuffle svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .btn-shuffle:hover svg { transform: rotate(180deg) }
+
+  .btn-veg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 20px;
+    background: var(--card-bg);
+    border: 1.5px solid rgba(76,140,60,0.25);
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3d7a2e;
+    cursor: default;
+  }
+  .veg-dot {
+    width: 10px; height: 10px;
+    border: 1.5px solid #3d7a2e;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .veg-dot::after {
+    content: '';
+    width: 5px; height: 5px;
+    background: #3d7a2e;
+    border-radius: 50%;
+  }
+
+  /* ─── Grid ─── */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 8px 16px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 540px) {
+    .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 8px 24px 80px; }
+  }
+  @media (min-width: 820px) {
+    .menu-grid { grid-template-columns: repeat(3, 1fr); }
+    header { padding-top: 56px; }
+  }
+  @media (min-width: 1080px) {
+    .menu-grid { grid-template-columns: repeat(4, 1fr); max-width: 1100px; }
+  }
+
+  /* ─── Card ─── */
+  .day-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .day-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .day-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+  }
+  .day-card.visible:hover {
+    transform: translateY(-4px);
+  }
+
+  .card-img-wrap {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f0e0cc, #e8d5bc);
+  }
+
+  .card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
+  }
+  .day-card:hover .card-img-wrap img {
+    transform: scale(1.06);
+  }
+
+  .card-img-wrap img.loading {
+    opacity: 0.3;
+  }
+
+  .day-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--deep-maroon);
+  }
+
+  .btn-swap {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .btn-swap:hover {
+    background: var(--saffron);
+    transform: rotate(90deg);
+  }
+  .btn-swap:hover svg { stroke: #fff }
+  .btn-swap svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .prep-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .prep-badge svg {
+    width: 12px; height: 12px;
+    stroke: #fff; stroke-width: 2; fill: none;
+  }
+
+  .card-body {
+    padding: 16px 16px 20px;
+  }
+
+  .dish-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .dish-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* ─── Swap animation ─── */
+  .day-card.swapping .card-img-wrap img {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  .day-card.swapping .card-body {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .card-body {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    padding: 0 20px 40px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px }
+  ::-webkit-scrollbar-track { background: transparent }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand-tag">Weekly Planner</div>
+    <h1>Subah Ka <em>Nashta</em></h1>
+    <p>Your weekly vegetarian breakfast menu, curated for the Indian family table</p>
+  </header>
+
+  <div class="shuffle-bar">
+    <button class="btn-shuffle" onclick="shuffleAll()" aria-label="Shuffle all">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+        <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+        <line x1="4" y1="4" x2="9" y2="9"/>
+      </svg>
+      Shuffle Week
+    </button>
+    <div class="btn-veg-badge">
+      <span class="veg-dot"></span>
+      Pure Veg
+    </div>
+  </div>
+
+  <div class="menu-grid" id="menuGrid"></div>
+
+  <footer>Made with love for Indian kitchens</footer>
+</div>
+
+<script>
+const DISHES = [
+  {
+    name: "Masala Dosa",
+    desc: "Crispy rice-lentil crepe filled with spiced potato, served with coconut chutney and sambar.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Poha",
+    desc: "Flattened rice tempered with mustard seeds, curry leaves, onions, and turmeric. Light and comforting.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1645177628172-a94c1f96e6db?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Idli Sambar",
+    desc: "Steamed rice cakes so soft they melt — paired with piping hot sambar and fresh chutneys.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Aloo Paratha",
+    desc: "Golden whole-wheat flatbread stuffed with spiced mashed potatoes. Best with curd and pickle.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Upma",
+    desc: "Savory semolina porridge with vegetables, mustard seeds, and a squeeze of fresh lemon.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Chole Bhature",
+    desc: "Fluffy deep-fried bread with rich, spiced chickpea curry. An indulgent weekend favourite.",
+    prep: "40 min",
+    img: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Uttapam",
+    desc: "Thick, spongy pancake topped with onions, tomatoes, and green chillies. South Indian pizza!",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1625398407796-82650a8c135f?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Medu Vada",
+    desc: "Crispy, golden urad dal doughnuts with a soft centre. Perfect dunked in sambar.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Dhokla",
+    desc: "Steamed, fluffy chickpea flour cake tempered with mustard seeds and green chillies. Gujarati classic.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Besan Chilla",
+    desc: "Savory gram flour pancakes loaded with onions, tomatoes, and fresh coriander. Protein-rich and quick.",
+    prep: "10 min",
+    img: "https://images.unsplash.com/photo-1604152135912-04a022e23696?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Sabudana Khichdi",
+    desc: "Tapioca pearls tossed with peanuts, cumin, and potatoes. Light, gluten-free, and full of flavour.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1613292443284-8d10ef9383fe?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Thepla",
+    desc: "Spiced Gujarati flatbread with fenugreek leaves. Great on its own or with chai and pickle.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Puri Bhaji",
+    desc: "Puffed golden puris with a dry spiced potato bhaji. The classic Sunday morning celebration.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Rava Dosa",
+    desc: "Lacy, crispy crepe made from semolina batter. Thin, crunchy, and irresistible with chutney.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Paneer Paratha",
+    desc: "Stuffed flatbread with crumbled paneer, green chillies, and fragrant spices. Rich and satisfying.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Misal Pav",
+    desc: "Spicy sprouted moth bean curry topped with farsan, onions, and lemon. A Maharashtrian firecracker.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Pesarattu",
+    desc: "Green moong dal crepe from Andhra Pradesh. Nutritious, vibrant, and wonderful with ginger chutney.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Appam & Stew",
+    desc: "Lacy fermented rice hoppers with a light coconut vegetable stew. Kerala comfort food.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Kachori",
+    desc: "Crispy, flaky pastry stuffed with a spiced moong dal filling. A Rajasthani morning treat.",
+    prep: "35 min",
+    img: "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Moong Dal Chilla",
+    desc: "Thin, protein-packed crepes made from ground moong dal. Light, healthy, and incredibly tasty.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1604152135912-04a022e23696?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Gobi Paratha",
+    desc: "Stuffed flatbread with spiced cauliflower filling. A Punjabi breakfast staple with butter and curd.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Bread Pakora",
+    desc: "Bread slices stuffed with spiced potato, dipped in gram flour batter, and deep fried. Crispy bliss.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Ven Pongal",
+    desc: "Creamy South Indian rice-lentil porridge with black pepper, cumin, and ghee. Pure soul food.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Batata Vada",
+    desc: "Spiced potato dumplings coated in chickpea batter and fried golden. Mumbai street-food royalty.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Akuri on Toast",
+    desc: "Parsi-style spiced scrambled eggs with onions, tomatoes, and fresh coriander on crispy toast.",
+    prep: "10 min",
+    img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Ragi Dosa",
+    desc: "Nutty finger millet crepe packed with calcium and iron. A healthy twist on the classic dosa.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Matar Kachori",
+    desc: "Flaky pastry filled with spiced green peas. Pairs beautifully with tangy tamarind chutney.",
+    prep: "35 min",
+    img: "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Puttu & Kadala",
+    desc: "Steamed rice flour cylinders with coconut, served with spiced black chickpea curry. Kerala favourite.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Methi Thepla",
+    desc: "Soft fenugreek-spiced flatbread from Gujarat. Perfect travel food — stays fresh for days.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Neer Dosa",
+    desc: "Paper-thin, lacy rice crepes from coastal Karnataka. Delicate and pairs with any curry or chutney.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Thalipeeth",
+    desc: "Multi-grain spiced flatbread from Maharashtra with onions and fresh coriander. Rustic and hearty.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Pongal Vada Combo",
+    desc: "Creamy ven pongal paired with crispy medu vada — the quintessential Tamil Nadu breakfast plate.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Sindhi Koki",
+    desc: "Crispy, thick flatbread loaded with onions and cumin. Crunchy outside, flaky layers inside.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Aloo Tikki",
+    desc: "Crispy spiced potato patties served with mint and tamarind chutneys. Street-food at home.",
+    prep: "25 min",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Dahi Vada",
+    desc: "Soft lentil dumplings soaked in creamy yoghurt, topped with sweet and spicy chutneys.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Khaman",
+    desc: "Spongy, tangy steamed chickpea cakes topped with mustard tempering and fresh coriander.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Masala Oats",
+    desc: "Indian-spiced oats with vegetables, mustard seeds, and curry leaves. Quick, modern, and nutritious.",
+    prep: "10 min",
+    img: "https://images.unsplash.com/photo-1613292443284-8d10ef9383fe?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Rava Idli",
+    desc: "Quick semolina idlis studded with cashews and mustard seeds. Fluffy, no fermentation needed.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Palak Paratha",
+    desc: "Vibrant green spinach flatbread — a sneaky way to get greens into the morning meal.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Dabeli",
+    desc: "Sweet-spicy potato filling in a pav bun with pomegranate, peanuts, and chutneys. Kutchi gem.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Malabar Parotta",
+    desc: "Flaky, layered flatbread from Kerala with a crispy exterior. Incredible with vegetable kurma.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Pav Bhaji",
+    desc: "Buttery mixed vegetable mash with soft toasted pav buns. Mumbai's most beloved street breakfast.",
+    prep: "30 min",
+    img: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Litti Chokha",
+    desc: "Baked wheat balls stuffed with sattu, served with smoky roasted veggie mash. Bihari soul food.",
+    prep: "40 min",
+    img: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Bisi Bele Bath",
+    desc: "Karnataka's spiced rice-lentil-veggie one-pot with a generous topping of ghee and boondi.",
+    prep: "35 min",
+    img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Kanda Poha",
+    desc: "Maharashtrian-style flattened rice with plenty of onions, peanuts, and a squeeze of lime.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1645177628172-a94c1f96e6db?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Set Dosa",
+    desc: "Thick, spongy, small dosas served in sets of three. Soft enough to soak up any curry.",
+    prep: "20 min",
+    img: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Sevai Upma",
+    desc: "Stir-fried rice vermicelli with peanuts, vegetables, and a hint of lemon. Light and satisfying.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Onion Pakora",
+    desc: "Crispy onion fritters in spiced gram flour batter. Best enjoyed hot with masala chai on rainy mornings.",
+    prep: "15 min",
+    img: "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600&h=400&fit=crop"
+  },
+  {
+    name: "Chana Chaat",
+    desc: "Tangy chickpea salad with onions, tomatoes, green chutney, and crispy sev. Refreshing and protein-rich.",
+    prep: "10 min",
+    img: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&h=400&fit=crop"
+  }
+];
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let currentMenu = [];
+let usedIndices = new Set();
+
+function pickRandom(exclude = new Set()) {
+  const available = DISHES.map((_, i) => i).filter(i => !exclude.has(i));
+  if (available.length === 0) {
+    usedIndices.clear();
+    return pickRandom(new Set());
+  }
+  const idx = available[Math.floor(Math.random() * available.length)];
+  return idx;
+}
+
+function generateMenu() {
+  usedIndices.clear();
+  currentMenu = [];
+  for (let i = 0; i < 7; i++) {
+    const idx = pickRandom(usedIndices);
+    usedIndices.add(idx);
+    currentMenu.push(idx);
+  }
+}
+
+function createCard(dayIndex) {
+  const dish = DISHES[currentMenu[dayIndex]];
+  const day = DAYS[dayIndex];
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.dataset.day = dayIndex;
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      <img src="${dish.img}" alt="${dish.name}" loading="lazy" onload="this.classList.remove('loading')" class="loading">
+      <span class="day-label">${day}</span>
+      <button class="btn-swap" onclick="swapDay(${dayIndex})" aria-label="Change ${day}'s dish">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+      <div class="prep-badge">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        ${dish.prep}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="dish-name">${dish.name}</div>
+      <div class="dish-desc">${dish.desc}</div>
+    </div>
+  `;
+  return card;
+}
+
+function renderMenu() {
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const card = createCard(i);
+    grid.appendChild(card);
+    setTimeout(() => card.classList.add('visible'), 60 * i + 30);
+  }
+}
+
+function shuffleAll() {
+  const cards = document.querySelectorAll('.day-card');
+  cards.forEach((c, i) => {
+    c.style.transition = 'opacity 0.25s, transform 0.25s';
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(16px) scale(0.97)';
+  });
+  setTimeout(() => {
+    generateMenu();
+    renderMenu();
+  }, 300);
+}
+
+function swapDay(dayIndex) {
+  const card = document.querySelector(`.day-card[data-day="${dayIndex}"]`);
+  card.classList.add('swapping');
+
+  setTimeout(() => {
+    const excludeSet = new Set(currentMenu);
+    const newIdx = pickRandom(excludeSet);
+    usedIndices.delete(currentMenu[dayIndex]);
+    currentMenu[dayIndex] = newIdx;
+    usedIndices.add(newIdx);
+
+    const newCard = createCard(dayIndex);
+    newCard.classList.add('visible');
+    card.replaceWith(newCard);
+  }, 320);
+}
+
+// Init
+generateMenu();
+renderMenu();
+</script>
+</body>
+</html>
